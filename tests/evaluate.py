@@ -3,7 +3,7 @@ evaluate.py – Multi-Subject Notes App
 Offline evaluation: runs a benchmark question set and reports metrics.
 
 Usage:
-  python evaluate.py [--questions questions.json]
+  python -m tests.evaluate --index <index_name> [--questions questions.json]
 """
 
 import argparse
@@ -15,17 +15,18 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.rag_chain import RAGChain
+from src.subjects_db import load_subjects
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
 # Default benchmark questions
 DEFAULT_QUESTIONS = [
-    "What is Antigravity's infinite context window?",
+    "What is Endee's infinite context window?",
     "How does Endee support hybrid search?",
     "What are the key failure modes in RAG systems?",
     "Explain the chunking strategy for RAG pipelines.",
-    "How does Antigravity use artifacts for durable context?",
+    "How does Endee use artifacts for durable context?",
     "What embedding model is recommended for Endee?",
     "What is the difference between model-native context and system-level memory?",
     "How does the cross-encoder reranker improve retrieval quality?",
@@ -34,15 +35,29 @@ DEFAULT_QUESTIONS = [
 ]
 
 
-def evaluate(questions: list[str]) -> dict:
+def _resolve_index_name(index_arg: str | None) -> str:
+    """Resolve an index name from CLI arg or fall back to the first subject."""
+    if index_arg:
+        return index_arg
+    subjects = load_subjects()
+    if subjects:
+        first = next(iter(subjects.values()))
+        name = first.get("index_name", "default")
+        logger.info(f"No --index given, using first subject index: '{name}'")
+        return name
+    logger.error("No --index given and no subjects found in subjects.json")
+    sys.exit(1)
+
+
+def evaluate(index_name: str, questions: list[str]) -> dict:
     """Run evaluation and return aggregate metrics."""
-    logger.info(f"Evaluating {len(questions)} questions...")
+    logger.info(f"Evaluating {len(questions)} questions against index '{index_name}'...")
     chain = RAGChain(use_reranker=True)
 
     results = []
     for i, q in enumerate(questions, 1):
         logger.info(f"[{i}/{len(questions)}] {q[:60]}...")
-        resp = chain.run(q, compute_metrics=True)
+        resp = chain.run(index_name=index_name, question=q, compute_metrics=True)
         results.append({
             "question": q,
             "answer_preview": resp.answer[:200],
@@ -58,6 +73,7 @@ def evaluate(questions: list[str]) -> dict:
     latencies = [r["latency"] for r in results]
 
     summary = {
+        "index_name": index_name,
         "total_questions": len(questions),
         "avg_faithfulness": statistics.mean(faithfulness_scores),
         "avg_answer_relevancy": statistics.mean(relevancy_scores),
@@ -71,6 +87,7 @@ def evaluate(questions: list[str]) -> dict:
     print("\n" + "=" * 60)
     print("📊 RAG Evaluation Report")
     print("=" * 60)
+    print(f"Index:                {summary['index_name']}")
     print(f"Total Questions:      {summary['total_questions']}")
     print(f"Avg Faithfulness:     {summary['avg_faithfulness']:.3f}  (higher = more grounded)")
     print(f"Avg Answer Relevancy: {summary['avg_answer_relevancy']:.3f}  (higher = more on-topic)")
@@ -88,6 +105,12 @@ def evaluate(questions: list[str]) -> dict:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate RAG pipeline")
     parser.add_argument(
+        "--index",
+        type=str,
+        default=None,
+        help="Endee index name to evaluate against (defaults to first subject)",
+    )
+    parser.add_argument(
         "--questions",
         type=str,
         default=None,
@@ -95,10 +118,12 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    index_name = _resolve_index_name(args.index)
+
     if args.questions:
         with open(args.questions) as f:
             questions = json.load(f)
     else:
         questions = DEFAULT_QUESTIONS
 
-    evaluate(questions)
+    evaluate(index_name, questions)
