@@ -1,6 +1,4 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# Dockerfile – Antigravity Infinite Context RAG Demo (Python app)
-# ─────────────────────────────────────────────────────────────────────────────
+# Dockerfile – Endee Infinite Context RAG Demo (Python app)
 FROM python:3.11-slim
 
 # System dependencies

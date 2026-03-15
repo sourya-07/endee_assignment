@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  # ─── Endee Vector Database ──────────────────────────────────────────────────
+  # Endee Vector Database
   endee:
     image: ghcr.io/endee-io/endee:latest
     container_name: endee_server
@@ -21,7 +21,7 @@ services:
       retries: 5
       start_period: 10s
 
-  # ─── Data Ingestion (one-shot) ───────────────────────────────────────────────
+  # Data Ingestion (one-shot)
   ingest:
     build: .
     container_name: sourya_rag_ingest
@@ -39,7 +39,7 @@ services:
     profiles:
       - ingest   # Run with: docker compose --profile ingest up ingest
 
-  # ─── RAG Application ─────────────────────────────────────────────────────────
+  # RAG Application
   app:
     build: .
     container_name: sourya_rag_app
