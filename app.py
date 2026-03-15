@@ -184,6 +184,8 @@ def refresh_dropdowns():
 
 CUSTOM_CSS = """
 /* ── CSS Variables ── */
+
+/* ── CSS Variables ── */
 :root {
     --bg-primary: #F0EDE5; /* Requested off-white */
     --accent: #004643;     /* Requested dark teal */
@@ -439,17 +441,17 @@ label, .gr-box label, .gr-textbox label, .gr-dropdown label {
 """
 
 HEADER_HTML = f"""
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&display=swap" rel="stylesheet">
 <div class="app-header">
     <h1>Multi-Subject Notes</h1>
     <p>Organize, ingest, and query your knowledge base — each subject is isolated with its own vector index.</p>
-    <div class="status-chip">{_llm_status()}</div>
+    <br>
+    <div class="status-chip">
+        {_llm_status()}
+    </div>
 </div>
-"""
-
-HEAD_HTML = """
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
-</style>
 """
 
 EXAMPLE_QUESTIONS = [
@@ -459,7 +461,7 @@ EXAMPLE_QUESTIONS = [
     "What connections exist between different ideas?",
 ]
 
-with gr.Blocks(title="Multi-Subject Notes", head=HEAD_HTML) as demo:
+with gr.Blocks(title="Multi-Subject Notes") as demo:
     gr.HTML(HEADER_HTML)
     
     # State mapping
@@ -632,6 +634,27 @@ with gr.Blocks(title="Multi-Subject Notes", head=HEAD_HTML) as demo:
         show_progress="full",
     )
 
+# JavaScript to forcefully disable dark mode and force light mode
+FORCE_LIGHT_MODE_JS = """
+function() {
+    document.querySelector('body').classList.remove('dark');
+    document.querySelector('body').classList.add('light');
+    
+    // Add logic to continually observe and remove the dark class if re-added
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.attributeName === "class") {
+                if (document.body.classList.contains('dark')) {
+                    document.body.classList.remove('dark');
+                    document.body.classList.add('light');
+                }
+            }
+        });
+    });
+    observer.observe(document.body, { attributes: true });
+}
+"""
+
 if __name__ == "__main__":
     logger.info(f"Starting Multi-Subject Notes on {APP_HOST}:{APP_PORT}")
     demo.launch(
@@ -639,10 +662,7 @@ if __name__ == "__main__":
         server_port=APP_PORT,
         show_error=True,
         share=False,
-        theme=gr.themes.Base(
-            font=[gr.themes.GoogleFont("Inter"), "system-ui", "sans-serif"],
-            primary_hue="teal",
-            neutral_hue="stone",
-        ),
+        theme=gr.themes.Base(),
         css=CUSTOM_CSS,
+        js=FORCE_LIGHT_MODE_JS,
     )
