@@ -1,11 +1,10 @@
 """
-rag_chain.py – Antigravity Infinite Context RAG Demo
+rag_chain.py – Endee Infinite Context RAG Demo
 RAG chain: retrieves context from Endee, prompts the LLM, returns answer + sources.
 Supports OpenAI-compatible APIs, Google Gemini, and Ollama (local).
 
 Evaluation metrics (faithfulness + answer relevancy) computed without external libraries.
 """
-
 import json
 import logging
 import time
@@ -13,7 +12,6 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
 
 from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
 from .retriever import EndeeRetriever
@@ -42,7 +40,7 @@ INSTRUCTIONS:
 - If the context does not contain sufficient information to answer, say so explicitly — do not hallucinate.
 - Be concise but comprehensive. Use bullet points where helpful.
 - For technical topics, include code examples if they appear in the context.
-- Do NOT output the formula `${\displaystyle {\textbf {F}}={\frac {d\mathbf {p} }{dt}}}$` or any complex LaTeX equations in your answer.
+- Do NOT output the formula `${{\displaystyle {{\textbf {{F}}}}={{\frac {{d\mathbf {{p}} }}{{dt}}}}}}$` or any complex LaTeX equations in your answer.
 
 CONTEXT:
 {context}
@@ -53,9 +51,7 @@ RAG_USER_TEMPLATE = """Question: {question}
 Please provide a clear, well-structured answer with citations."""
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # LLM Backends
-# ─────────────────────────────────────────────────────────────────────────────
 
 def _call_openai(system_prompt: str, user_message: str) -> str:
     try:
@@ -78,15 +74,14 @@ def _call_openai(system_prompt: str, user_message: str) -> str:
 
 def _call_google(system_prompt: str, user_message: str) -> str:
     try:
-        import google.generativeai as genai
-        genai.configure(api_key=GOOGLE_API_KEY)
-        model = genai.GenerativeModel(
-            model_name=GOOGLE_MODEL,
-            system_instruction=system_prompt,
-        )
-        response = model.generate_content(
-            user_message,
-            generation_config=genai.types.GenerationConfig(
+        from google import genai
+        from google.genai import types
+
+        client = genai.Client(api_key=GOOGLE_API_KEY)
+        response = client.models.generate_content(
+            model=GOOGLE_MODEL,
+            contents=f"{system_prompt}\n\n{user_message}",
+            config=types.GenerateContentConfig(
                 max_output_tokens=LLM_MAX_TOKENS,
                 temperature=LLM_TEMPERATURE,
             ),
@@ -136,9 +131,7 @@ def _call_llm(system_prompt: str, user_message: str) -> str:
         return f"[Config Error] Unknown LLM_PROVIDER='{LLM_PROVIDER}'. Set to 'openai', 'google', or 'ollama'."
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # Evaluation Metrics (lightweight, no external eval library required)
-# ─────────────────────────────────────────────────────────────────────────────
 
 class _MetricComputer:
     """Lazy-loaded singleton for metric computation."""
@@ -178,9 +171,7 @@ def compute_answer_relevancy(question: str, answer: str) -> float:
     return max(0.0, min(1.0, score))
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # Main RAG Chain
-# ─────────────────────────────────────────────────────────────────────────────
 
 @dataclass
 class RAGResponse:
