@@ -17,9 +17,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Pre-download embedding and reranker models so they're baked into the image
 RUN python -c "\
-from sentence_transformers import SentenceTransformer, CrossEncoder; \
-SentenceTransformer('all-MiniLM-L6-v2'); \
-CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')"
+    from sentence_transformers import SentenceTransformer, CrossEncoder; \
+    SentenceTransformer('all-MiniLM-L6-v2'); \
+    CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')"
 
 # Copy application code
 COPY . .

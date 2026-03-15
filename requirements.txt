@@ -22,6 +22,8 @@ PyPDF2>=3.0.0
 numpy>=1.24.0
 
 # UI
+gradio>=4.36.0
+gradio_client>=1.0.0
 streamlit>=1.35.0
 
 # Utilities

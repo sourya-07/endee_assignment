@@ -15,7 +15,7 @@ services:
       # NDD_AUTH_TOKEN: ${ENDEE_AUTH_TOKEN:-}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/v1/health" ]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -35,9 +35,9 @@ services:
       EMBED_DIM: ${EMBED_DIM:-384}
       CHUNK_SIZE: ${CHUNK_SIZE:-200}
       CHUNK_OVERLAP: ${CHUNK_OVERLAP:-40}
-    command: ["python", "ingest.py"]
+    command: [ "python", "ingest.py" ]
     profiles:
-      - ingest   # Run with: docker compose --profile ingest up ingest
+      - ingest # Run with: docker compose --profile ingest up ingest
 
   # RAG Application
   app:
@@ -66,7 +66,7 @@ services:
       APP_PORT: "7860"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7860/"]
+      test: [ "CMD", "curl", "-f", "http://localhost:7860/" ]
       interval: 30s
       timeout: 10s
       retries: 3
