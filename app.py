@@ -189,7 +189,7 @@ CUSTOM_CSS = """
 :root {
     --bg-primary: #F0EDE5; /* Requested off-white */
     --accent: #004643;     /* Requested dark teal */
-    --bg-paper: #ffffff;
+    --bg-paper: #e5e7eb;
     --text-primary: #004643;
     --text-secondary: #004643;
     
@@ -206,9 +206,14 @@ CUSTOM_CSS = """
 /* ── Global Resets ── */
 *, *::before, *::after { box-sizing: border-box; }
 
-body, .gradio-container {
+body, .gradio-container, .gradio-container.dark {
     background: var(--bg-primary) !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    color: var(--text-primary) !important;
+}
+
+/* Force all text elements in dark mode to use dark teal */
+.dark *, .dark p, .dark h1, .dark h2, .dark h3, .dark span, .dark label, .dark div {
     color: var(--text-primary) !important;
 }
 
@@ -255,7 +260,7 @@ footer, .gradio-container footer { display: none !important; }
 }
 
 /* ── Tabs ── */
-.gr-tab-item {
+.tab-nav > button {
     border-radius: var(--radius) var(--radius) 0 0 !important;
     border: var(--border-width) solid var(--accent) !important;
     border-bottom: none !important;
@@ -268,52 +273,31 @@ footer, .gradio-container footer { display: none !important; }
     text-transform: uppercase;
     margin-right: -3px !important; /* Overlap borders */
 }
-.gr-tab-item:hover {
-    background: #e4e0d5 !important;
+.tab-nav > button:hover {
+    background: #d1d5db !important;
 }
-.gr-tab-item.selected {
+.tab-nav > button.selected {
     background: var(--bg-paper) !important;
     box-shadow: 0 -4px 0px var(--accent) inset !important;
 }
 
 /* ── Cards / Content Areas ── */
 .panel-card, .gr-form, .gr-box {
-    background: var(--bg-paper) !important;
-    border: var(--border-width) solid var(--accent) !important;
-    border-radius: var(--radius) !important;
-    padding: 20px !important;
     box-shadow: var(--shadow-brutal) !important;
+    border-radius: var(--radius) !important;
 }
 
-/* ── Inputs ── */
-.gr-textbox textarea, .gr-textbox input,
-input[type="text"], textarea {
-    background: var(--bg-paper) !important;
-    border: 2px solid var(--accent) !important;
-    border-radius: 0 !important;
-    color: var(--accent) !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 1rem !important;
-    font-weight: 600 !important;
-    padding: 12px 14px !important;
+/* ── Inputs & Dropdowns (Shadows Only) ── */
+/* Add neobrutalist shadows to inputs and dropdowns, defer backgrounds and borders to Gradio Theme */
+.gr-box, .gr-input, .gr-dropdown {
     box-shadow: 3px 3px 0px var(--accent) !important;
     transition: var(--transition) !important;
-}
-.gr-textbox textarea:focus, .gr-textbox input:focus,
-input[type="text"]:focus, textarea:focus {
-    box-shadow: 1px 1px 0px var(--accent) !important;
-    transform: translate(2px, 2px) !important;
-    outline: none !important;
+    border-radius: 0 !important;
 }
 
-/* ── Dropdowns ── */
-.gr-dropdown, .gr-dropdown .wrap-inner {
-    background: var(--bg-paper) !important;
-    border: 2px solid var(--accent) !important;
-    border-radius: 0 !important;
-    color: var(--accent) !important;
-    font-weight: 600 !important;
-    box-shadow: 3px 3px 0px var(--accent) !important;
+.gr-box:focus-within, .gr-input:focus-within, .gr-dropdown:focus-within {
+    box-shadow: 1px 1px 0px var(--accent) !important;
+    transform: translate(2px, 2px) !important;
 }
 
 /* ── Buttons ── */
@@ -331,7 +315,7 @@ input[type="text"]:focus, textarea:focus {
     cursor: pointer !important;
 }
 .gr-button:hover {
-    background: #e4e0d5 !important;
+    background: #d1d5db !important;
 }
 .gr-button:active {
     box-shadow: var(--shadow-hover) !important;
@@ -340,9 +324,23 @@ input[type="text"]:focus, textarea:focus {
 button.primary, .gr-button-primary, #ask_btn, #create_subj_btn, #ingest_btn {
     background: #fdf577 !important;
     color: var(--accent) !important;
+    border: 2px solid var(--accent) !important;
+    box-shadow: 4px 4px 0px var(--accent) !important;
+    padding: 12px 24px !important;
+    font-weight: 900 !important;
+    font-size: 1rem !important;
+    border-radius: 0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
 }
 button.primary:hover, .gr-button-primary:hover, #ask_btn:hover, #create_subj_btn:hover, #ingest_btn:hover {
     background: #fce83a !important; /* Slightly darker yellow */
+    transform: translate(2px, 2px) !important;
+    box-shadow: 2px 2px 0px var(--accent) !important;
+}
+button.primary:active, .gr-button-primary:active, #ask_btn:active, #create_subj_btn:active, #ingest_btn:active {
+    transform: translate(4px, 4px) !important;
+    box-shadow: 0px 0px 0px var(--accent) !important;
 }
 
 /* ── Form labels ── */
@@ -402,13 +400,24 @@ label, .gr-box label, .gr-textbox label, .gr-dropdown label {
 }
 
 /* ── Examples ── */
-.gr-examples .gr-sample-textbox {
+button.gallery-item {
     background: var(--bg-paper) !important;
     border: 2px solid var(--accent) !important;
     border-radius: 0 !important;
     color: var(--accent) !important;
     font-weight: 600 !important;
+    font-family: 'Inter', sans-serif !important;
     box-shadow: 2px 2px 0px var(--accent) !important;
+    transition: var(--transition) !important;
+    padding: 10px 14px !important;
+    margin-bottom: 8px !important;
+}
+
+button.gallery-item:hover {
+    background: #d1d5db !important; /* Light grey hover */
+    color: var(--accent) !important;
+    box-shadow: 1px 1px 0px var(--accent) !important;
+    transform: translate(1px, 1px) !important;
 }
 
 /* ── Section title ── */
@@ -470,7 +479,7 @@ with gr.Blocks(title="Multi-Subject Notes") as demo:
 
     with gr.Tabs() as main_tabs:
         
-        # ── Tab 1: Ask Your Notes ─────────────────────────────────────────
+        # Tab 1: Ask Your Notes
         with gr.Tab("Ask Your Notes", id="query_tab"):
             with gr.Row(equal_height=True):
                 # Left panel: Input
@@ -536,7 +545,7 @@ with gr.Blocks(title="Multi-Subject Notes") as demo:
                                 value="Raw context chunks from Endee will appear here."
                             )
 
-        # ── Tab 2: Manage Subjects ────────────────────────────────────────
+        # Tab 2: Manage Subjects
         with gr.Tab("Manage Subjects", id="manage_tab"):
             with gr.Row(equal_height=True):
                 # Column 1: Create New Subject
@@ -579,7 +588,7 @@ with gr.Blocks(title="Multi-Subject Notes") as demo:
                     ingest_btn = gr.Button("Process & Add Content", variant="primary", elem_id="ingest_btn")
                     ingest_msg = gr.Markdown("")
     
-    # ── Event Wiring ────────────────────────────────────────────────────────
+    # Event Wiring 
     
     main_tabs.select(
         fn=refresh_dropdowns, 
@@ -657,12 +666,57 @@ function() {
 
 if __name__ == "__main__":
     logger.info(f"Starting Multi-Subject Notes on {APP_HOST}:{APP_PORT}")
+    
+    # Forcefully override base theme variables
+    custom_theme = gr.themes.Base(
+        primary_hue="teal",
+        neutral_hue="slate",
+    ).set(
+        # Backgrounds
+        body_background_fill="#F0EDE5",
+        body_background_fill_dark="#F0EDE5",
+        background_fill_primary="#e5e7eb",
+        background_fill_primary_dark="#e5e7eb",
+        background_fill_secondary="#e5e7eb",
+        background_fill_secondary_dark="#e5e7eb",
+        block_background_fill="#e5e7eb",
+        block_background_fill_dark="#e5e7eb",
+        panel_background_fill="#e5e7eb",
+        panel_background_fill_dark="#e5e7eb",
+        input_background_fill="#e5e7eb",
+        input_background_fill_dark="#e5e7eb",
+        checkbox_background_color="#e5e7eb",
+        checkbox_background_color_dark="#e5e7eb",
+        
+        # Text Colors
+        body_text_color="#004643",
+        body_text_color_dark="#004643",
+        block_label_text_color="#004643",
+        block_label_text_color_dark="#004643",
+        block_title_text_color="#004643",
+        block_title_text_color_dark="#004643",
+        
+        # Borders
+        border_color_primary="#004643",
+        border_color_primary_dark="#004643",
+        border_color_accent="#004643",
+        border_color_accent_dark="#004643",
+        block_border_color="#004643",
+        block_border_color_dark="#004643",
+        panel_border_color="#004643",
+        panel_border_color_dark="#004643",
+        
+        # Additional formatting
+        block_border_width="2px",
+        panel_border_width="2px",
+    )
+    
     demo.launch(
         server_name=APP_HOST,
         server_port=APP_PORT,
         show_error=True,
         share=False,
-        theme=gr.themes.Base(),
+        theme=custom_theme,
         css=CUSTOM_CSS,
         js=FORCE_LIGHT_MODE_JS,
     )

@@ -43,7 +43,7 @@ NEOBRUTALIST_CSS = """
 :root {
     --bg:       #F0EDE5;
     --accent:   #004643;
-    --paper:    #ffffff;
+    --paper:    #e5e7eb;
     --yellow:   #fdf577;
     --yellow2:  #fce83a;
     --border:   3px solid var(--accent);
@@ -130,13 +130,16 @@ h1, h2, h3, h4 {
     background: var(--paper) !important;
     box-shadow: none !important;
 }
+.stTabs [data-baseweb="tab"]:hover {
+    background: #d1d5db !important;
+}
 .stTabs [data-baseweb="tab-panel"] { padding: 0 !important; }
 
 /* ── Buttons ── */
 .stButton > button {
     border: var(--border) !important;
     box-shadow: var(--shadow) !important;
-    background: var(--yellow) !important;
+    background: var(--paper) !important;
     color: var(--accent) !important;
     font-weight: 800 !important;
     text-transform: uppercase !important;
@@ -145,14 +148,26 @@ h1, h2, h3, h4 {
     transition: all .1s ease !important;
     width: 100%;
 }
-.stButton > button:hover {
-    background: var(--yellow2) !important;
-    box-shadow: var(--shadow-sm) !important;
-    transform: translate(3px, 3px) !important;
+.stButton > button[kind="primary"] {
+    background: var(--yellow) !important;
+    color: var(--accent) !important;
+    border: 2px solid var(--accent) !important;
+    box-shadow: 4px 4px 0px var(--accent) !important;
+    padding: 12px 24px !important;
+    font-weight: 900 !important;
+    font-size: 1rem !important;
+    border-radius: 0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
 }
-.stButton > button:active {
-    transform: translate(5px, 5px) !important;
-    box-shadow: 0 0 0 var(--accent) !important;
+.stButton > button[kind="primary"]:hover {
+    background: var(--yellow2) !important;
+    transform: translate(2px, 2px) !important;
+    box-shadow: 2px 2px 0px var(--accent) !important;
+}
+.stButton > button[kind="primary"]:active {
+    transform: translate(4px, 4px) !important;
+    box-shadow: 0px 0px 0px var(--accent) !important;
 }
 
 /* ── Inputs ── */
@@ -341,7 +356,7 @@ with ask_tab:
             category_filter = st.selectbox("Category filter", ["All", "lecture", "textbook", "note", "article"], key="cat_filter")
             use_reranker = st.checkbox("Enable cross-encoder reranking", value=True, key="reranker")
 
-        ask_clicked = st.button("Ask", key="ask_btn")
+        ask_clicked = st.button("Ask", key="ask_btn", type="primary")
         st.markdown('</div>', unsafe_allow_html=True)
 
     with right:
@@ -417,7 +432,7 @@ with manage_tab:
         st.markdown('<div class="neo-card">', unsafe_allow_html=True)
         st.markdown('<div class="section-title">Create New Subject</div>', unsafe_allow_html=True)
         new_subject_name = st.text_input("Subject Name", placeholder="e.g. Quantum Physics, History, Biology", key="new_subject")
-        if st.button("Create Subject", key="create_btn"):
+        if st.button("Create Subject", key="create_btn", type="primary"):
             if not new_subject_name or not new_subject_name.strip():
                 st.warning("Please enter a subject name.")
             else:
@@ -437,7 +452,7 @@ with manage_tab:
         links_text = st.text_area("Paste URLs (one per line)", placeholder="https://example.com/article", key="links_text")
         reset_index = st.checkbox("Reset index before ingesting", value=False, key="reset_index")
 
-        if st.button("Process & Add Content", key="ingest_btn"):
+        if st.button("Process & Add Content", key="ingest_btn", type="primary"):
             if not ingest_subject:
                 st.warning("Please select a subject first.")
             else:
