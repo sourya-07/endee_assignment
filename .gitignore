@@ -1,0 +1,27 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+*.log
+*.json
+!package.json
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+# Model cache (large files)
+~/.cache/torch/
+# Evaluation outputs
+eval_results.json
+# Endee local data (when running without Docker)
+./data/

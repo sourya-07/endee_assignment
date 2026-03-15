@@ -1,0 +1,77 @@
+version: "3.9"
+
+services:
+  # ─── Endee Vector Database ──────────────────────────────────────────────────
+  endee:
+    image: ghcr.io/endee-io/endee:latest
+    container_name: endee_server
+    ports:
+      - "8080:8080"
+    volumes:
+      - endee_data:/data
+    environment:
+      NDD_DATA_DIR: /data
+      # Optional: set NDD_AUTH_TOKEN for authenticated access
+      # NDD_AUTH_TOKEN: ${ENDEE_AUTH_TOKEN:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ─── Data Ingestion (one-shot) ───────────────────────────────────────────────
+  ingest:
+    build: .
+    container_name: sourya_rag_ingest
+    depends_on:
+      endee:
+        condition: service_healthy
+    environment:
+      ENDEE_HOST: http://endee:8080
+      INDEX_NAME: ${INDEX_NAME:-sourya_rag}
+      EMBED_MODEL: ${EMBED_MODEL:-all-MiniLM-L6-v2}
+      EMBED_DIM: ${EMBED_DIM:-384}
+      CHUNK_SIZE: ${CHUNK_SIZE:-200}
+      CHUNK_OVERLAP: ${CHUNK_OVERLAP:-40}
+    command: ["python", "ingest.py"]
+    profiles:
+      - ingest   # Run with: docker compose --profile ingest up ingest
+
+  # ─── RAG Application ─────────────────────────────────────────────────────────
+  app:
+    build: .
+    container_name: sourya_rag_app
+    depends_on:
+      endee:
+        condition: service_healthy
+    ports:
+      - "${APP_PORT:-7860}:7860"
+    environment:
+      ENDEE_HOST: http://endee:8080
+      INDEX_NAME: ${INDEX_NAME:-sourya_rag}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      GOOGLE_MODEL: ${GOOGLE_MODEL:-gemini-1.5-flash}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3}
+      EMBED_MODEL: ${EMBED_MODEL:-all-MiniLM-L6-v2}
+      EMBED_DIM: ${EMBED_DIM:-384}
+      TOP_K: ${TOP_K:-5}
+      RERANK_TOP_N: ${RERANK_TOP_N:-3}
+      APP_HOST: "0.0.0.0"
+      APP_PORT: "7860"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  endee_data:
+    driver: local
