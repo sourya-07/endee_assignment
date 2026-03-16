@@ -9,6 +9,14 @@
 
 ---
 
+## 🎬 Demo
+
+▶️ **[Watch the full demo video on Google Drive](https://drive.google.com/file/d/1h3NxTrNapHnnv7xGO8wKi3xMYP_xPj-x/view?usp=sharing)**
+
+See the app in action — creating subjects, uploading documents, and getting AI-powered answers from your own notes.
+
+---
+
 ## 🤔 What Does This App Do?
 
 Think of it as **ChatGPT for your own documents** — but you control the data and can run it entirely offline.
@@ -304,6 +312,22 @@ python tests/test_ui.py
 - [ ] Conversation history / follow-up questions
 - [ ] Multi-document upload with drag-and-drop
 - [ ] Export answers as Markdown/PDF
+
+---
+
+## ⚠️ Known Limitations
+
+| Limitation | Details |
+|---|---|
+| **Endee must be running locally** | The app depends on Endee vector database running on `localhost:8080`. If Endee is not started via Docker before launching the app, all ingestion and query operations will fail with a `Connection refused` error. |
+| **No conversation history** | Each question is answered independently. The LLM has no memory of previous questions in the same session — follow-up questions require repeating context manually. |
+| **Cold-start model loading** | On the first query of a session, the `all-MiniLM-L6-v2` embedding model and the cross-encoder reranker are downloaded (~100 MB total) and loaded into memory. This causes a noticeable delay (~10–20 seconds) on first use. |
+| **PDF text extraction only** | For PDF files, only embedded text is extracted. Scanned PDFs or image-based PDFs (without OCR) will produce empty or near-empty content, resulting in no useful vectors being indexed. |
+| **Single-user local deployment** | The app is designed for personal, single-user use. There is no authentication, user management, or multi-tenancy — running it on a public server would expose all data to anyone with the URL. |
+| **LLM hallucination risk** | Like all RAG systems, the quality of answers depends on the relevance of retrieved chunks. If the indexed content doesn't contain the answer, the LLM may hallucinate plausible-sounding but incorrect information. |
+| **Chunk size is fixed** | Documents are chunked into fixed ~200-word windows with 40-word overlap. Very short documents (e.g., a single paragraph) may produce only one chunk, reducing retrieval diversity. Very long documents may produce many chunks, increasing memory usage. |
+| **No real-time URL updates** | Web pages ingested via URL are scraped once at upload time. Any subsequent changes to the source page are not reflected unless the URL is re-ingested with the "Reset index" option enabled. |
+| **Metrics are approximations** | Faithfulness and Answer Relevancy scores are computed using cosine similarity between embeddings — they are useful indicators but not rigorous evaluation metrics. |
 
 ---
 
